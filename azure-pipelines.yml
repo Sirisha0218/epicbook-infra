@@ -13,7 +13,7 @@ variables:
   - name: terraformVersion
     value: "1.6.0"
   - name: tfWorkingDir
-    value: "infra"
+    value: "terraform"
 
 stages:
   - stage: Terraform_Infra
@@ -28,24 +28,17 @@ stages:
             inputs:
               terraformVersion: $(terraformVersion)
 
-          # (Optional) Generate terraform.auto.tfvars from pipeline variables
-          - script: |
-              echo "db_username = \"$(db_username)\"" > terraform.auto.tfvars
-              echo "db_password = \"$(db_password)\"" >> terraform.auto.tfvars
-            workingDirectory: $(tfWorkingDir)
-            displayName: "Generate terraform.auto.tfvars"
-
           # Terraform Init
-          - script: terraform init
-            workingDirectory: $(tfWorkingDir)
+          - script: terraform init 
+            workingDirectory: $(System.DefaultWorkingDirectory)/$(tfWorkingDir)
             env:
               AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
               AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
               AWS_DEFAULT_REGION: $(AWS_DEFAULT_REGION)
 
           # Terraform Plan
-          - script: terraform plan -out=tfplan
-            workingDirectory: $(tfWorkingDir)
+          - script: terraform plan -var-file=terraform.tfvars -out=tfplan
+            workingDirectory: $(System.DefaultWorkingDirectory)/$(tfWorkingDir)
             env:
               AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
               AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
@@ -53,7 +46,7 @@ stages:
 
           # Terraform Apply
           - script: terraform apply -auto-approve tfplan
-            workingDirectory: $(tfWorkingDir)
+            workingDirectory: $(System.DefaultWorkingDirectory)/$(tfWorkingDir)
             env:
               AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
               AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
@@ -64,5 +57,5 @@ stages:
               echo "##vso[task.setvariable variable=frontend_public_ip]$(terraform output -raw frontend_public_ip)"
               echo "##vso[task.setvariable variable=backend_public_ip]$(terraform output -raw backend_public_ip)"
               echo "##vso[task.setvariable variable=mysql_endpoint]$(terraform output -raw mysql_endpoint)"
-            workingDirectory: $(tfWorkingDir)
+            workingDirectory: $(System.DefaultWorkingDirectory)/$(tfWorkingDir)
             displayName: "Publish Terraform Outputs"
