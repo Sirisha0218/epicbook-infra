@@ -86,7 +86,7 @@ variable "db_instance_class" {
 variable "db_engine_version" {
   description = "MySQL engine version"
   type        = string
-  default     = "8.0.36"
+  default     = "5.7.44-rds.20240408"
 }
 
 variable "db_name" {

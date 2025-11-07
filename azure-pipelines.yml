@@ -4,7 +4,7 @@ trigger:
       - main
 
 pool:
-  vmImage: 'ubuntu-latest'
+  name: 'linux-hosted-agent-pool'
 
 variables:
   - group: Terraform-AWS-Creds   # contains AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, db_username, db_password
